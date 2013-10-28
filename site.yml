@@ -1,0 +1,27 @@
+---
+- hosts: microinstance
+  user: ec2-user
+  sudo_user: root
+  sudo: yes 
+
+  tasks:
+
+  - name: install some useful packages
+    yum: name={{item}} state=latest enablerepo=epel
+    with_items:
+    - irssi
+    - screen
+    - mosh
+
+  - name: set up tim's user
+    user: name=tgerla comment="Tim Gerla"
+
+  - name: set up tim's authorized key
+    authorized_key: user=tgerla key="{{ lookup('file', '/Users/tgerla/.ssh/tgerla-aws-pub.pem') }}"
+
+  - name: set up sudo
+    copy: src=files/tgerla-sudoers dest=/etc/sudoers.d/tgerla mode=0440 owner=root group=root
+ 
+  - name: set up irssi config
+    file: path=/home/tgerla/.irssi state=directory owner=tgerla group=tgerla 
+  - copy: src=files/irssi.config dest=/home/tgerla/.irssi/config owner=tgerla group=tgerla
